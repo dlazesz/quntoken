@@ -28,7 +28,7 @@ def get_modules(filename):
 def get_pairs(filename):
     """Teszt-fajlbol olvas, visszater az input-elvartoutput parok listajaval
     """
-    with open(filename) as f:
+    with open(filename, encoding='UTF-8') as f:
         lines = f.readlines()
     inp_prefix = 'IN : '
     out_prefix = 'OUT: '
@@ -96,7 +96,7 @@ def test_modules(get_data):
     fajlra lefut.
     """
     logname, modules, pairs = get_data
-    with open(logname, 'w') as logfile:
+    with open(logname, 'w', encoding='UTF-8') as logfile:
         for inp, exp in pairs:
             out = ''.join(call_modules([inp], modules))
             logging(modules, inp, exp, out, logfile)

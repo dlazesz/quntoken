@@ -1,6 +1,7 @@
 setuptools
 twine
 wheel
+cryptography<3.0
 
 autopep8
 pylint

@@ -53,3 +53,5 @@ qt_*
 *.tar.gz
 *.zip
 
+# built artifacts
+release/*.whl

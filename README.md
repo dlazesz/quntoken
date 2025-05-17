@@ -15,6 +15,9 @@ Developer requirements:
 * python 2.7 (for quex)
 * g++ = 5
 
+**WARNING**: It is recommended to use Docker to build the wheel! (use `make build-docker`, wheel will be created in [release](release) folder)
+For detailed build instructions see [Dockerfile](Dockerfile).
+
 ## Install
 
 ```sh

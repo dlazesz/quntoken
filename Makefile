@@ -12,6 +12,13 @@ all:
 .PHONY: all
 
 
+build-docker:
+	@rm -rf release/*.whl
+	docker build -t quntoken-builder .
+	docker run --rm -it -v $(PWD)/release:/build/release --user=$$(id -u):$$(id -g) quntoken-builder:latest
+.PHONY: build-docker
+
+
 release: clean
 	@make -s build OPT='-O1'
 	@make -s test
@@ -85,7 +92,7 @@ venv:
 
 clean:
 	@rm -f quntoken/qt_*
-	@find tmp -maxdepth 1 -type f -exec rm -f {} \;
+	@[ -d "tmp" ] && find tmp -maxdepth 1 -type f -exec rm -f {} \; || :  # noop if tmp dir not exists
 	@rm -rf build/
 	@rm -rf dist/
 	@rm -rf quntoken.egg-info/

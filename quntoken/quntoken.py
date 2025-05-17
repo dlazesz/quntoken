@@ -19,7 +19,7 @@ def call_modules(inp, modules):
     prefix = os.path.join(mydir, 'qt_')
     cmd = [prefix + x for x in modules]
     cmd = ' | '.join(cmd)
-    proc = subprocess.Popen(cmd, shell=True,
+    proc = subprocess.Popen(cmd, shell=True, encoding='UTF-8',
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
