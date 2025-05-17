@@ -15,7 +15,8 @@ Developer requirements:
 * python 2.7 (for quex)
 * g++ = 5
 
-**WARNING**: It is recommended to use Docker to build the wheel! (use `make build-docker`, wheel will be created in [release](release) folder)
+**WARNING**: It is recommended to use Docker to build the wheel! (use `make build-docker`,
+ wheel will be created in [release](release) folder)
 For detailed build instructions see [Dockerfile](Dockerfile).
 
 ## Install
@@ -44,7 +45,7 @@ quntoken <input.txt >output.tsv
 Optional arguments:
 
 ```txt
-  -h, --help            show this help message and exit
+  -h, --help            Show this help message and exit
   -f {json,raw,spl,tsv,xml}, --form {json,raw,spl,tsv,xml}
                         Valid formats: json, tsv, xml and spl (sentence per
                         line, ignores mode). Default format: tsv.
@@ -54,6 +55,10 @@ Optional arguments:
   -c, --conll-text      Add CoNLL text metafield to contain the detokenized
                         sentence (only for mode == token and format == tsv).
                         Default: False
+  -i, --input           One or more input files. ('-' for STDIN) Default: STDIN
+  -o, --output          One output file. ('-' for STDOUT) Default: STDOUT
+  -s, --separate-lines  Separate processing of each line.
+                        (Starts new tokenizer for each line.) Default: False
   -w, --word-break      Eliminate word break from end of lines.
   -v, --version         show program's version number and exit
 ```

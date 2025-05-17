@@ -21,4 +21,4 @@ WORKDIR /build/
 
 RUN make prereq release
 
-CMD ["sh", "-c", "cp /build/dist/quntoken-*-py3-none-any.whl /build/release/"]
+CMD ["sh", "-c", "cp /build/dist/quntoken-* /build/release/"]
