@@ -13,7 +13,7 @@ all:
 
 
 build-docker:
-	@rm -rf release/*.whl
+	@rm -rf release/quntoken-*
 	docker build -t quntoken-builder .
 	docker run --rm -it -v $(PWD)/release:/build/release --user=$$(id -u):$$(id -g) quntoken-builder:latest
 .PHONY: build-docker

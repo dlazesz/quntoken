@@ -118,7 +118,10 @@ def main():
     input_filename = args.pop('input')
     output_filename = args.pop('output')
     separate_lines = args.pop('separate_lines')
-    with fileinput.input(input_filename, encoding='UTF-8') as inp_fh, \
+    # The openhook parameter is compatible with a wide range of Pyhton versions.
+    # From 3.10 it is enough to use encoding='UTF-8' directly!
+    with fileinput.input(input_filename,
+                         openhook=lambda filename, mode: open(filename, mode, encoding='UTF-8')) as inp_fh, \
             WriteFileOrStdout(output_filename, mode='w', encoding='UTF-8') as out_fh:
         if separate_lines:
             for line in inp_fh:
