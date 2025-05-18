@@ -1,7 +1,7 @@
 import sys
 import argparse
 import fileinput
-from pathlib import Path
+from typing import Union
 from io import TextIOWrapper
 
 try:
@@ -82,32 +82,50 @@ def get_args():
     return res
 
 
-class WriteFileOrStdout:
-    """Unified opener for output file and STDOUT"""
+class OpenFileOrSTDStreams:
+    """Unified opener for output files and STDStreams (STDIN and STDOUT)"""
 
-    def __init__(self, path, mode, encoding, **kwargs):
-        if mode not in {'w', 'wb'}:
-            raise ValueError(f"Mode ({mode}) is invalid! Options are 'w' or 'wb' !")
+    # From 3.10 it should be enough to use encoding='UTF-8' directly in fileinput.input()!
+
+    def __init__(self, path: Union[list, str], mode='r', *, encoding=None, **kwargs):
+        allowed_modes = {'r', 'w'}
+        if mode not in allowed_modes:
+            raise ValueError(f"Mode ({mode}) is invalid! Options are {', '.join(sorted(allowed_modes))} !")
         self._mode = mode
 
+        if isinstance(path, list) and mode != 'r':
+            raise ValueError("Multiple files can be opened for reading only (mode='r')!")
+
+        if encoding is None:
+            raise ValueError('Encoding must be specified!')
+        self._encoding = encoding
+
+        self._path = path
         self._kwargs = kwargs
+        self._fh = None
+        self._close = False
         if path == '-':
-            self._path = None
-            if self._mode == 'w':
-                self._fh = TextIOWrapper(sys.stdout.buffer, encoding=encoding, **self._kwargs)
-            else:
-                self._fh = sys.stdout.buffer
-        else:
-            self._path = Path(path)
-            self._fh = None
+            # There is no way to set STDOUT or specify the encoding for STDIN in fileinput.input()
+            # to force encoding even when no UTF-8 locale is set (e.g. in Docker containers)
+            if self._mode == 'r':
+                self._fh = TextIOWrapper(sys.stdin.buffer, encoding=self._encoding, **self._kwargs)
+            elif self._mode == 'w':
+                self._fh = TextIOWrapper(sys.stdout.buffer, encoding=self._encoding, **self._kwargs)
 
     def __enter__(self):
         if self._fh is None:
-            self._fh = open(self._path, self._mode, **self._kwargs)
+            if self._mode == 'r':  # Reading one or more files (fileinput closes itself automatically)
+                self._fh = fileinput.input(self._path,
+                                           openhook=
+                                           lambda filename, mode: open(filename, mode, encoding=self._encoding))
+            else:  # Writing to file
+                self._fh = open(self._path, self._mode, encoding=self._encoding, **self._kwargs)
+                self._close = True
+        # Reading from and writing to STDIN/STDOUT has already been set up
         return self._fh
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        if self._fh is not None:
+        if self._close:
             self._fh.close()
 
 
@@ -118,11 +136,8 @@ def main():
     input_filename = args.pop('input')
     output_filename = args.pop('output')
     separate_lines = args.pop('separate_lines')
-    # The openhook parameter is compatible with a wide range of Pyhton versions.
-    # From 3.10 it is enough to use encoding='UTF-8' directly!
-    with fileinput.input(input_filename,
-                         openhook=lambda filename, mode: open(filename, mode, encoding='UTF-8')) as inp_fh, \
-            WriteFileOrStdout(output_filename, mode='w', encoding='UTF-8') as out_fh:
+    with OpenFileOrSTDStreams(input_filename, encoding='UTF-8') as inp_fh, \
+            OpenFileOrSTDStreams(output_filename, mode='w', encoding='UTF-8') as out_fh:
         if separate_lines:
             for line in inp_fh:
                 out_fh.writelines(tokenize(line, **args))
